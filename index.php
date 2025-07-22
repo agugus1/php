@@ -92,6 +92,17 @@
             border-color: #218838;
         }
 
+        .btn-danger {
+            background-color: #dc3545; /* Rojo */
+            border-color: #dc3545;
+            transition: background-color 0.3s ease; /* Transición suave */
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333; /* Rojo más oscuro */
+            border-color: #c82333;
+        }
+
         .alert {
             border-radius: 8px; /* Bordes más redondeados */
             margin-top: 1rem; /* Espacio superior */
@@ -168,6 +179,10 @@
                         <i class="fas fa-child"></i>
                         Edad
                     </th>
+                    <th scope="col">
+                        <i class="fas fa-trash-alt"></i>
+                        Acciones
+                    </th>
                 </tr>
             </thead>
             <tbody>
@@ -204,6 +219,23 @@
                     }
                 }
 
+                // Procesar eliminación
+                if (isset($_POST['eliminar'])) {
+                    $idpersona = $_POST['idpersona'];
+                    $sql_delete = "DELETE FROM persona WHERE idpersona = '$idpersona'";
+                    if ($conn->query($sql_delete) === TRUE) {
+                        echo "<div class='alert alert-success'>
+                                <i class='fas fa-check-circle'></i>
+                                Persona eliminada correctamente.
+                              </div>";
+                    } else {
+                        echo "<div class='alert alert-danger'>
+                                <i class='fas fa-exclamation-triangle'></i>
+                                Error al eliminar persona: " . $conn->error . "
+                              </div>";
+                    }
+                }
+
                 // Consulta a la base de datos
                 $sql = "SELECT idpersona, documento, nombre, edad FROM persona";
                 $resultado = $conn->query($sql);
@@ -216,12 +248,21 @@
                                 <td>{$fila['documento']}</td>
                                 <td><span class='highlight'>{$fila['nombre']}</span></td>
                                 <td>{$fila['edad']}</td>
+                                <td>
+                                    <form method='post' action='' style='display:inline;'>
+                                        <input type='hidden' name='idpersona' value='{$fila['idpersona']}'>
+                                        <button type='submit' class='btn btn-danger btn-sm' name='eliminar'>
+                                            <i class='fas fa-trash-alt'></i>
+                                            Eliminar
+                                        </button>
+                                    </form>
+                                </td>
                               </tr>";
                         $row_number++;
                     }
                 } else {
                     echo "<tr>
-                            <td colspan='4'>
+                            <td colspan='5'>
                                 <div class='alert alert-info'>
                                     <i class='fas fa-info-circle'></i>
                                     No se encontraron resultados.
@@ -238,4 +279,5 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
 </body>
+</html>
 </html>
