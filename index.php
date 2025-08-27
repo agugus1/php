@@ -51,6 +51,27 @@ if (isset($_POST['eliminar'])) {
     $conn->query($sql_delete);
 }
 
+if (isset($_POST['modificar'])) {
+    $idpersona = $conn->real_escape_string($_POST['idpersona']);
+    $documento = $conn->real_escape_string($_POST['documento']);
+    $nombre = $conn->real_escape_string($_POST['nombre']);
+    $edad = $conn->real_escape_string($_POST['edad']);
+
+    $sql_update = "UPDATE persona SET documento='$documento', nombre='$nombre', edad='$edad' WHERE idpersona='$idpersona'";
+    $conn->query($sql_update);
+}
+
+// Cargar datos para modificar
+$estudiante_a_modificar = null;
+if (isset($_GET['edit'])) {
+    $idpersona = $conn->real_escape_string($_GET['edit']);
+    $sql = "SELECT * FROM persona WHERE idpersona = '$idpersona'";
+    $resultado = $conn->query($sql);
+    if ($resultado->num_rows > 0) {
+        $estudiante_a_modificar = $resultado->fetch_assoc();
+    }
+}
+
 // Página actual
 $page = isset($_GET['page']) ? $_GET['page'] : 'login';
 if (!isset($_SESSION['loggedin']) && $page !== 'login') {
@@ -255,17 +276,20 @@ if (!isset($_SESSION['loggedin']) && $page !== 'login') {
         <form method="post">
             <div class="mb-3">
                 <label for="documento" class="form-label">Documento</label>
-                <input type="text" name="documento" id="documento" class="form-control" required>
+                <input type="text" name="documento" id="documento" class="form-control" value="<?php echo $estudiante_a_modificar['documento'] ?? ''; ?>" required>
             </div>
             <div class="mb-3">
                 <label for="nombre" class="form-label">Nombre</label>
-                <input type="text" name="nombre" id="nombre" class="form-control" required>
+                <input type="text" name="nombre" id="nombre" class="form-control" value="<?php echo $estudiante_a_modificar['nombre'] ?? ''; ?>" required>
             </div>
             <div class="mb-3">
                 <label for="edad" class="form-label">Edad</label>
-                <input type="number" name="edad" id="edad" class="form-control" required>
+                <input type="number" name="edad" id="edad" class="form-control" value="<?php echo $estudiante_a_modificar['edad'] ?? ''; ?>" required>
             </div>
-            <button type="submit" name="agregar" class="btn btn-success">Agregar Persona</button>
+            <input type="hidden" name="idpersona" value="<?php echo $estudiante_a_modificar['idpersona'] ?? ''; ?>">
+            <button type="submit" name="<?php echo isset($estudiante_a_modificar) ? 'modificar' : 'agregar'; ?>" class="btn btn-success">
+                <?php echo isset($estudiante_a_modificar) ? 'Modificar Persona' : 'Agregar Persona'; ?>
+            </button>
             <a href="index.php?page=home" class="btn btn-secondary">Volver</a>
         </form>
     </div>
@@ -293,6 +317,7 @@ if (!isset($_SESSION['loggedin']) && $page !== 'login') {
                         <td>{$row['nombre']}</td>
                         <td>{$row['edad']}</td>
                         <td>
+                            <a href='index.php?page=dashboard&edit={$row['idpersona']}' class='btn btn-warning btn-sm'>Modificar</a>
                             <form method='post' style='display:inline;'>
                                 <input type='hidden' name='idpersona' value='{$row['idpersona']}'>
                                 <button type='submit' name='eliminar' class='btn btn-danger btn-sm'>Eliminar</button>
